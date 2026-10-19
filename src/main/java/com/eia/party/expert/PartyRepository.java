@@ -66,4 +66,22 @@ public class PartyRepository {
                 request.legalName(), request.legalName().toLowerCase(), java.sql.Timestamp.from(now), java.sql.Timestamp.from(now));
         return findById(request.tenantId(), id).orElseThrow();
     }
+
+    /**
+     * Updates the party status and increments the aggregate version. The
+     * returned party is the new state; an empty result means the party was
+     * not found or is not ACTIVE.
+     */
+    public Optional<Party> updateStatus(UUID tenantId, UUID id, String status) {
+        Instant now = Instant.now();
+        int updated = jdbc.update("""
+                UPDATE party
+                   SET status = ?, version = version + 1, updated_at = ?
+                 WHERE tenant_id = ? AND id = ? AND record_state = 'ACTIVE'
+                """, status, java.sql.Timestamp.from(now), tenantId, id);
+        if (updated == 0) {
+            return Optional.empty();
+        }
+        return findById(tenantId, id);
+    }
 }

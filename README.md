@@ -21,6 +21,32 @@ Party persistence, invariants, read models, batch jobs, Quartz schedules, and ou
 - Maintain README, CODEOWNERS, SECURITY, CHANGELOG, tests, and local verification.
 - Contain no business logic in shared libraries or front-end remotes.
 
+## Transactional outbox
+
+Party mutations and their event row commit in one database transaction. The
+outbox table is created by `src/main/resources/schema.sql`.
+
+| Operation | Event | Payload |
+|---|---|---|
+| `POST /internal/v1/parties` | `party.party.created` | `partyId`, `partyNumber`, `partyType`, `status`, `roles[]` |
+| `PATCH /internal/v1/parties/{id}/status` | `party.party.updated` | `partyId`, `partyNumber`, `changedFields`, `version`, `from`, `to`, `reason` |
+
+Events use the envelope from `eia-platform/libs`; `book` is `DIRECT` because
+the current Party API has no book input and Party is shared master data.
+
+Dispatch is disabled by default and is scheduled by Quartz only when
+`eia.outbox.enabled=true`:
+
+- `EIA_OUTBOX_ENABLED` (default `false`)
+- `EIA_OUTBOX_ENDPOINT` (required when enabled)
+- `EIA_OUTBOX_BATCH_SIZE` (default `100`)
+- `EIA_OUTBOX_MAX_ATTEMPTS` (default `12`)
+- `EIA_OUTBOX_SIGNING_SECRET` (optional HMAC secret)
+
+The Gradle build uses a composite build against `../eia-platform` so
+`com.eia:libs` resolves to the local `:libs` project. There is no broker; the
+dispatcher posts the envelope over HTTP.
+
 ## Verification
 
 - Lint and format

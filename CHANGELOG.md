@@ -8,4 +8,6 @@ The format is based on Keep a Changelog and the project uses Semantic Versioning
 
 ### Added
 
-- Repository baseline.
+- Transactional outbox writes for `party.party.created` and `party.party.updated`.
+- Party status update endpoint and conditional Quartz outbox dispatch.
+- Outbox schema DDL.

@@ -21,10 +21,14 @@ import java.util.UUID;
  */
 @Service
 public class PartyReferenceDataService {
-    static final Set<String> IDENTIFIER_TYPES =
-            Set.of("TAX_ID", "REGISTRATION", "LICENSE", "PASSPORT", "OTHER");
-    static final Set<String> ADDRESS_TYPES =
-            Set.of("PRIMARY", "MAILING", "BILLING", "OTHER");
+    static final Set<String> IDENTIFIER_TYPES = Set.of(
+            "TAX_ID", "REGISTRATION", "LICENSE",
+            "TIN", "EIN", "SSN", "ITIN", "DUNS", "LEI", "PASSPORT", "DRIVER_LICENSE",
+            "STATE_ID", "MEDICARE_ID", "MEDICAID_ID", "NPI", "BAR_NUMBER",
+            "ACORD_PARTY_ID", "ISO_PARTY_ID", "TRUST_CLAIM_NUMBER", "BANKRUPTCY_CASE_NUMBER", "OTHER");
+    static final Set<String> ADDRESS_TYPES = Set.of(
+            "PRIMARY", "LEGAL", "PHYSICAL", "MAILING", "BILLING", "CLAIM_SITE", "EXPOSURE_SITE",
+            "EMPLOYER", "PROVIDER", "BANK", "OTHER");
     private static final String CREATED_BY = "system";
 
     private final PartyRepository parties;

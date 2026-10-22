@@ -24,6 +24,8 @@ import java.util.UUID;
 final class PartyEvents {
     static final String CREATED = "party.party.created";
     static final String UPDATED = "party.party.updated";
+    static final String IDENTIFIER_ADDED = "party.party.identifier-added";
+    static final String ADDRESS_ADDED = "party.party.address-added";
 
     private static final Book EVENT_BOOK = Book.DIRECT;
     private static final String VERTICAL = "party";
@@ -59,6 +61,54 @@ final class PartyEvents {
         }
 
         return envelope(after, UPDATED, aggregateVersion, now, data);
+    }
+
+    static EventEnvelope identifierAdded(Party party, PartyIdentifier identifier, Instant now) {
+        long aggregateVersion = party.version() + 1L;
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("partyId", party.id());
+        data.put("partyNumber", party.partyNumber());
+        data.put("version", party.version());
+        data.put("identifierId", identifier.id());
+        data.put("identifierType", identifier.identifierType());
+        data.put("identifierValue", identifier.identifierValue());
+        if (identifier.issuingAuthority() != null) {
+            data.put("issuingAuthority", identifier.issuingAuthority());
+        }
+        if (identifier.effectiveDate() != null) {
+            data.put("effectiveDate", identifier.effectiveDate().toString());
+        }
+        data.put("createdBy", identifier.createdBy());
+        data.put("createdAt", identifier.createdAt());
+
+        return envelope(party, IDENTIFIER_ADDED, aggregateVersion, now, data);
+    }
+
+    static EventEnvelope addressAdded(Party party, PartyAddress address, Instant now) {
+        long aggregateVersion = party.version() + 1L;
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("partyId", party.id());
+        data.put("partyNumber", party.partyNumber());
+        data.put("version", party.version());
+        data.put("addressId", address.id());
+        data.put("addressType", address.addressType());
+        data.put("line1", address.line1());
+        if (address.line2() != null) {
+            data.put("line2", address.line2());
+        }
+        data.put("city", address.city());
+        if (address.stateRegion() != null) {
+            data.put("stateRegion", address.stateRegion());
+        }
+        data.put("postalCode", address.postalCode());
+        data.put("country", address.country());
+        if (address.effectiveDate() != null) {
+            data.put("effectiveDate", address.effectiveDate().toString());
+        }
+        data.put("createdBy", address.createdBy());
+        data.put("createdAt", address.createdAt());
+
+        return envelope(party, ADDRESS_ADDED, aggregateVersion, now, data);
     }
 
     private static EventEnvelope envelope(

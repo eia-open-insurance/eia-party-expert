@@ -68,6 +68,24 @@ public class PartyRepository {
     }
 
     /**
+     * Increments the aggregate version for a child fact (identifier or
+     * address) that belongs to the Party aggregate. The returned party is the
+     * new state; an empty result means the party is not found or not ACTIVE.
+     */
+    public Optional<Party> bumpVersion(UUID tenantId, UUID id) {
+        Instant now = Instant.now();
+        int updated = jdbc.update("""
+                UPDATE party
+                   SET version = version + 1, updated_at = ?
+                 WHERE tenant_id = ? AND id = ? AND record_state = 'ACTIVE'
+                """, java.sql.Timestamp.from(now), tenantId, id);
+        if (updated == 0) {
+            return Optional.empty();
+        }
+        return findById(tenantId, id);
+    }
+
+    /**
      * Updates the party status and increments the aggregate version. The
      * returned party is the new state; an empty result means the party was
      * not found or is not ACTIVE.

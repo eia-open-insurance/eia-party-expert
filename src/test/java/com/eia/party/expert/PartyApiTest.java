@@ -34,6 +34,8 @@ class PartyApiTest {
 
     @BeforeEach
     void setUp() {
+        jdbc.update("DELETE FROM party_identifier");
+        jdbc.update("DELETE FROM party_address");
         jdbc.update("DELETE FROM outbox_event");
         jdbc.update("DELETE FROM party");
     }

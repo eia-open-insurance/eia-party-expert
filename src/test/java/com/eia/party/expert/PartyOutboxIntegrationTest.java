@@ -33,6 +33,8 @@ class PartyOutboxIntegrationTest {
     @BeforeEach
     void setUp() {
         transaction = new TransactionTemplate(transactionManager);
+        jdbc.update("DELETE FROM party_identifier");
+        jdbc.update("DELETE FROM party_address");
         jdbc.update("DELETE FROM outbox_event");
         jdbc.update("DELETE FROM party");
     }

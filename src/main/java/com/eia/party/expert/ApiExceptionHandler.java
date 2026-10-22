@@ -15,6 +15,12 @@ public class ApiExceptionHandler {
         return Map.of("code", "NOT_FOUND", "message", ex.getMessage());
     }
 
+    @ExceptionHandler(PartyChildNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> childNotFound(PartyChildNotFoundException ex) {
+        return Map.of("code", "NOT_FOUND", "message", ex.getMessage());
+    }
+
     @ExceptionHandler(PartyIdentifierConflictException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public Map<String, String> conflict(PartyIdentifierConflictException ex) {

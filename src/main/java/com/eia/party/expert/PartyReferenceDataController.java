@@ -44,6 +44,27 @@ public class PartyReferenceDataController {
         return service.addIdentifier(tenant(tenantId, tenantHeader), partyId, request);
     }
 
+    @PatchMapping("/{partyId}/identifiers/{identifierId}")
+    public PartyIdentifier updateIdentifier(
+            @PathVariable UUID partyId,
+            @PathVariable UUID identifierId,
+            @RequestParam(required = false) UUID tenantId,
+            @RequestHeader(value = "X-EIA-Tenant", required = false) UUID tenantHeader,
+            @Valid @RequestBody UpdatePartyIdentifierRequest request) {
+        return service.updateIdentifier(
+                tenant(tenantId, tenantHeader), partyId, identifierId, request);
+    }
+
+    @DeleteMapping("/{partyId}/identifiers/{identifierId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteIdentifier(
+            @PathVariable UUID partyId,
+            @PathVariable UUID identifierId,
+            @RequestParam(required = false) UUID tenantId,
+            @RequestHeader(value = "X-EIA-Tenant", required = false) UUID tenantHeader) {
+        service.deleteIdentifier(tenant(tenantId, tenantHeader), partyId, identifierId);
+    }
+
     @GetMapping("/{partyId}/addresses")
     public List<PartyAddress> listAddresses(
             @PathVariable UUID partyId,
@@ -60,6 +81,27 @@ public class PartyReferenceDataController {
             @RequestHeader(value = "X-EIA-Tenant", required = false) UUID tenantHeader,
             @Valid @RequestBody CreatePartyAddressRequest request) {
         return service.addAddress(tenant(tenantId, tenantHeader), partyId, request);
+    }
+
+    @PatchMapping("/{partyId}/addresses/{addressId}")
+    public PartyAddress updateAddress(
+            @PathVariable UUID partyId,
+            @PathVariable UUID addressId,
+            @RequestParam(required = false) UUID tenantId,
+            @RequestHeader(value = "X-EIA-Tenant", required = false) UUID tenantHeader,
+            @Valid @RequestBody UpdatePartyAddressRequest request) {
+        return service.updateAddress(
+                tenant(tenantId, tenantHeader), partyId, addressId, request);
+    }
+
+    @DeleteMapping("/{partyId}/addresses/{addressId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteAddress(
+            @PathVariable UUID partyId,
+            @PathVariable UUID addressId,
+            @RequestParam(required = false) UUID tenantId,
+            @RequestHeader(value = "X-EIA-Tenant", required = false) UUID tenantHeader) {
+        service.deleteAddress(tenant(tenantId, tenantHeader), partyId, addressId);
     }
 
     private static UUID tenant(UUID tenantId, UUID tenantHeader) {

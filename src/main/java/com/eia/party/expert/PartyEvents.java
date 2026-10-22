@@ -25,7 +25,11 @@ final class PartyEvents {
     static final String CREATED = "party.party.created";
     static final String UPDATED = "party.party.updated";
     static final String IDENTIFIER_ADDED = "party.party.identifier-added";
+    static final String IDENTIFIER_UPDATED = "party.party.identifier-updated";
+    static final String IDENTIFIER_DELETED = "party.party.identifier-deleted";
     static final String ADDRESS_ADDED = "party.party.address-added";
+    static final String ADDRESS_UPDATED = "party.party.address-updated";
+    static final String ADDRESS_DELETED = "party.party.address-deleted";
 
     private static final Book EVENT_BOOK = Book.DIRECT;
     private static final String VERTICAL = "party";
@@ -109,6 +113,104 @@ final class PartyEvents {
         data.put("createdAt", address.createdAt());
 
         return envelope(party, ADDRESS_ADDED, aggregateVersion, now, data);
+    }
+
+    static EventEnvelope identifierUpdated(Party party, PartyIdentifier before, PartyIdentifier after,
+                                           List<String> changedFields, Instant now) {
+        long aggregateVersion = party.version() + 1L;
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("partyId", party.id());
+        data.put("partyNumber", party.partyNumber());
+        data.put("version", party.version());
+        data.put("identifierId", after.id());
+        data.put("changedFields", changedFields);
+        data.put("from", identifierSnapshot(before));
+        data.put("to", identifierSnapshot(after));
+
+        return envelope(party, IDENTIFIER_UPDATED, aggregateVersion, now, data);
+    }
+
+    /**
+     * Deletion carries the last stored snapshot of the removed identifier
+     * because the row is gone after the transaction commits.
+     */
+    static EventEnvelope identifierDeleted(Party party, PartyIdentifier deleted, Instant now) {
+        long aggregateVersion = party.version() + 1L;
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("partyId", party.id());
+        data.put("partyNumber", party.partyNumber());
+        data.put("version", party.version());
+        data.put("identifierId", deleted.id());
+        data.putAll(identifierSnapshot(deleted));
+        data.put("createdBy", deleted.createdBy());
+        data.put("createdAt", deleted.createdAt());
+
+        return envelope(party, IDENTIFIER_DELETED, aggregateVersion, now, data);
+    }
+
+    static EventEnvelope addressUpdated(Party party, PartyAddress before, PartyAddress after,
+                                        List<String> changedFields, Instant now) {
+        long aggregateVersion = party.version() + 1L;
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("partyId", party.id());
+        data.put("partyNumber", party.partyNumber());
+        data.put("version", party.version());
+        data.put("addressId", after.id());
+        data.put("changedFields", changedFields);
+        data.put("from", addressSnapshot(before));
+        data.put("to", addressSnapshot(after));
+
+        return envelope(party, ADDRESS_UPDATED, aggregateVersion, now, data);
+    }
+
+    /**
+     * Deletion carries the last stored snapshot of the removed address because
+     * the row is gone after the transaction commits.
+     */
+    static EventEnvelope addressDeleted(Party party, PartyAddress deleted, Instant now) {
+        long aggregateVersion = party.version() + 1L;
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("partyId", party.id());
+        data.put("partyNumber", party.partyNumber());
+        data.put("version", party.version());
+        data.put("addressId", deleted.id());
+        data.putAll(addressSnapshot(deleted));
+        data.put("createdBy", deleted.createdBy());
+        data.put("createdAt", deleted.createdAt());
+
+        return envelope(party, ADDRESS_DELETED, aggregateVersion, now, data);
+    }
+
+    private static Map<String, Object> identifierSnapshot(PartyIdentifier identifier) {
+        Map<String, Object> snapshot = new LinkedHashMap<>();
+        snapshot.put("identifierType", identifier.identifierType());
+        snapshot.put("identifierValue", identifier.identifierValue());
+        if (identifier.issuingAuthority() != null) {
+            snapshot.put("issuingAuthority", identifier.issuingAuthority());
+        }
+        if (identifier.effectiveDate() != null) {
+            snapshot.put("effectiveDate", identifier.effectiveDate().toString());
+        }
+        return snapshot;
+    }
+
+    private static Map<String, Object> addressSnapshot(PartyAddress address) {
+        Map<String, Object> snapshot = new LinkedHashMap<>();
+        snapshot.put("addressType", address.addressType());
+        snapshot.put("line1", address.line1());
+        if (address.line2() != null) {
+            snapshot.put("line2", address.line2());
+        }
+        snapshot.put("city", address.city());
+        if (address.stateRegion() != null) {
+            snapshot.put("stateRegion", address.stateRegion());
+        }
+        snapshot.put("postalCode", address.postalCode());
+        snapshot.put("country", address.country());
+        if (address.effectiveDate() != null) {
+            snapshot.put("effectiveDate", address.effectiveDate().toString());
+        }
+        return snapshot;
     }
 
     private static EventEnvelope envelope(
